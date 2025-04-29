@@ -1,29 +1,21 @@
-// app/api/uploadthing/core.ts
-import { getAuth } from "@clerk/nextjs/server";
-import { NextRequest } from "next/server";
+// Resource: https://docs.uploadthing.com/nextjs/appdir#creating-your-first-fileroute
+// Above resource shows how to setup uploadthing. Copy paste most of it as it is.
+// We're changing a few things in the middleware and configs of the file upload i.e., "media", "maxFileCount"
+
+import { currentUser } from "@clerk/nextjs/server";";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 
 const f = createUploadthing();
 
-const getUser = async (req: NextRequest | undefined) => {
-  // If using an older version of Clerk, we may need a different approach
-  try {
-    if (!req) return null;
-    const { userId } = getAuth(req);
-    return userId ? { id: userId } : null;
-  } catch (error) {
-    console.error("Auth error:", error);
-    return null;
-  }
-};
+const getUser = async () => await currentUser();
 
 export const ourFileRouter = {
-  // Define a route for media uploads (images)
+  // Define as many FileRoutes as you like, each with a unique routeSlug
   media: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
+    .middleware(async (req) => {
       // This code runs on your server before upload
-      const user = await getUser(req);
+      const user = await getUser();
 
       // If you throw, the user will not be able to upload
       if (!user) throw new Error("Unauthorized");
@@ -34,10 +26,8 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
+
       console.log("file url", file.url);
-      
-      // Return the file data to the client
-      return { uploadedBy: metadata.userId, fileUrl: file.url };
     }),
 } satisfies FileRouter;
 

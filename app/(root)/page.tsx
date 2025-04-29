@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-
-import ThreadCard from "@/components/card/ThreadCard";
+import ThreadCard from "@/components/cards/ThreadCard";
 import Pagination from "@/components/shared/Pagination";
 
 import { fetchPosts } from "@/lib/actions/thread.actions";
@@ -18,15 +17,18 @@ async function Home({
   const userInfo = await fetchUser(user.id);
   if (!userInfo?.onboarded) redirect("/onboarding");
 
+  // Convert searchParams.page to number safely
+  const pageNumber = searchParams.page ? parseInt(searchParams.page) : 1;
+  
   const result = await fetchPosts(
-    searchParams.page ? +searchParams.page : 1,
+    pageNumber,
     30
   );
 
   return (
     <>
-      <h1 className="head-text text-left">Home</h1>
-
+      <h1 className="head-text">Home</h1>
+      
       <section className="mt-9 flex flex-col gap-10">
         {result.posts.length === 0 ? (
           <p className="no-result">No threads found</p>
@@ -51,7 +53,7 @@ async function Home({
 
       <Pagination
         path="/"
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
+        pageNumber={pageNumber}
         isNext={result.isNext}
       />
     </>

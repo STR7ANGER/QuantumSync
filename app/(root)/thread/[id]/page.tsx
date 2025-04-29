@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 
-import Comment from "@/components/forms/Comments";
-import ThreadCard from "@/components/card/ThreadCard";
+import Comment from "@/components/forms/Comment";
+import ThreadCard from "@/components/cards/ThreadCard";
 
 import { fetchUser } from "@/lib/actions/user.actions";
 import { fetchThreadById } from "@/lib/actions/thread.actions";
